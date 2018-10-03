@@ -4,45 +4,73 @@
 void ofApp::setup(){
 
     //  Shaders
-    shader.load("shaders/grayscott");
+    gs_shader.load("shaders/grayscott2");
+    vz_shader.load("shaders/draw");
     
     //  Fbos
-    output.allocate(ofGetWidth(), ofGetHeight());
-    output.begin();
-    ofClear(0, 255);
-    output.end();
     pingpong.allocate(ofGetWidth(), ofGetHeight());
+    output.allocate(ofGetWidth(), ofGetHeight());
+    
+    //  Plane
+    plane.set(ofGetWidth(), ofGetHeight());
+    plane.mapTexCoordsFromTexture(pingpong.src->getTexture());
+    
+    //  Images
+    tex.load("turquoise_metal.jpg");
+    
+    //  OF
+    ofSetFrameRate(60);
 }
 
 //--------------------------------------------------------------
 void ofApp::update(){
 
-    pingpong.dst->begin();
+    ofSetWindowTitle(ofToString(ofGetFrameRate(), 2));
     
-    ofClear(0, 0, 0, 255);
+    for(int i = 0; i < passes; ++i)
+    {
+        pingpong.dst->begin();
     
-    shader.begin();
+        ofClear(0, 0, 0, 255);
     
-    shader.setUniformTexture("prevTexture", pingpong.src->getTexture(), 0);
-    shader.setUniformTexture("tex0", output.getTexture(), 1);
-    shader.setUniform1f( "ru", (float)ru);
-    shader.setUniform1f( "rv", (float)rv);
-    shader.setUniform1f( "f", (float)f );
-    shader.setUniform1f( "k", (float)k );
+        gs_shader.begin();
     
-    pingpong.src->draw(0, 0);
+        //    shader.setUniformTexture("prevTexture", pingpong.src->getTexture(), 0);
+        //    shader.setUniform1f( "ru", (float)ru);
+        //    shader.setUniform1f( "rv", (float)rv);
+        //    shader.setUniform1f( "f", (float)f );
+        //    shader.setUniform1f( "k", (float)k );
     
-    shader.end();
+        gs_shader.setUniformTexture("iChannel0", pingpong.src->getTexture(), 0);
+        gs_shader.setUniform1i( "iFrame", ofGetFrameNum());
+        gs_shader.setUniform2f("iResolution", ofGetWidth(), ofGetHeight());
+
     
-    pingpong.dst->end();
+        pingpong.src->draw(0, 0);
     
-    pingpong.swap();
+        gs_shader.end();
+    
+        pingpong.dst->end();
+    
+        pingpong.swap();
+    }
+
 }
 
 //--------------------------------------------------------------
 void ofApp::draw(){
+    
+    vz_shader.begin();
+    
+    vz_shader.setUniformTexture("tex0", pingpong.src->getTexture(), 0);
+    vz_shader.setUniform2f("iResolution", ofGetWidth(), ofGetHeight());
 
-    pingpong.src->draw(0, 0);
+    ofPushMatrix();
+    ofTranslate(ofGetWidth()/2, ofGetHeight()/2);
+    plane.draw();
+    ofPopMatrix();
+    
+    vz_shader.end();
 }
 
 //--------------------------------------------------------------
@@ -65,7 +93,7 @@ void ofApp::mouseDragged(int x, int y, int button){
 
     pingpong.src->begin();
     ofSetColor(ofNoise( ofGetElapsedTimef() )*255);
-    ofDrawCircle(x, y, 3);
+    ofDrawCircle(x, y, 32);
     pingpong.src->end();
 }
 

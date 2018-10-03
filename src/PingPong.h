@@ -15,7 +15,7 @@ public:
     
     PingPong();
     
-    void allocate(int _width, int _height, int _internalformat = GL_RGBA);
+    void allocate(int _width, int _height, int _internalformat = GL_RGBA32F_ARB);
     void swap();
     void clear();
     

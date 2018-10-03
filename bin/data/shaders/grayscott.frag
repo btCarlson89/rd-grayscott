@@ -4,7 +4,6 @@
 float kernel[KERNEL_SIZE];    
 vec2 offset[KERNEL_SIZE];
 
-uniform sampler2DRect tex0;
 uniform sampler2DRect prevTexture; // U := r, V := g, other channels ignored
 uniform float ru;          // rate of diffusion of U
 uniform float rv;          // rate of diffusion of V    
@@ -25,7 +24,7 @@ void main(void)
     kernel[5] = 1.0;    
     kernel[6] = 0.707106781;    
     kernel[7] = 1.0;    
-    kernel[8] = 0.707106781;    
+    kernel[8] = 0.707106781;  
 
     offset[0] = vec2( -1.0, -1.0);
     offset[1] = vec2(  0.0, -1.0);
@@ -40,7 +39,6 @@ void main(void)
     offset[8] = vec2(  1.0, 1.0);
 
     vec2 texColor      = texture(prevTexture, vTexCoord).rb;
-    float srcTexColor  = texture(tex0, vTexCoord ).r;
 
     vec2 laplace        = vec2( 0.0, 0.0 );
 
@@ -49,11 +47,11 @@ void main(void)
         laplace     += tmp * kernel[i];
     }   
 
-    float F     = f + srcTexColor * 0.025 - 0.0005;    
-    float K     = k + srcTexColor * 0.025 - 0.0005;    
+    float F     = f - 0.0005;    
+    float K     = k - 0.0005;    
 
     float u     = texColor.r;
-    float v     = texColor.g  + srcTexColor * 0.5;
+    float v     = texColor.g;
     float uvv   = u * v * v;
     float du    = ru * laplace.r - uvv + F * (1.0 - u);
     float dv    = rv * laplace.g + uvv - (F + K) * v;

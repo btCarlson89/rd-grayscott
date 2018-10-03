@@ -4,26 +4,22 @@
 #define COLOR_MAX 0.35
 
 uniform vec2 iResolution;
-uniform sampler2D iChannel0;
+uniform sampler2DRect tex0;
+
+in vec2 vTexCoord;
 
 out vec4 fragColor;
 
 float getGradient(vec2 uv)
 {
-  return (COLOR_MAX - texture(iChannel0, uv).y) /
+  return (COLOR_MAX - texture(tex0, uv).y) /
          (COLOR_MAX - COLOR_MIN);
-}
-
-vec2 getTexel(vec2 uv)
-{
-    return texture(iChannel0, uv).xy;
 }
 
 void main()
 {
 	vec2 uv = gl_FragCoord.xy / iResolution.xy;
-	//float v = getGradient(uv);
-	vec2 v = getTexel(uv);
+	float v = getGradient(vTexCoord);
     
-    fragColor = vec4(v, 0.0, 1.0);
+    fragColor = vec4(v, v, v, 1.0);
 }

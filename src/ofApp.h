@@ -23,12 +23,21 @@ public:
     void dragEvent(ofDragInfo dragInfo);
     void gotMessage(ofMessage msg);
 	
-    ofFbo output;
     PingPong pingpong;
-    ofShader shader;
+    
+    ofFbo output;
+    
+    ofShader gs_shader;
+    ofShader vz_shader;
+    
+    ofImage tex;
+        
+    ofPlanePrimitive plane;
     
     float ru = 0.25f;
     float f  = 0.0195f;
     float rv = 0.04f;
     float k  = 0.066f;
+    
+    int passes = 8;
 };
